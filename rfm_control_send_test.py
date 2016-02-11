@@ -50,65 +50,43 @@ prev_packet = None
 
 start = time.time()
 
+message = "Node 1: 12345\n"
+message_bytes = bytes(message,"utf-8")
+
 def tic():
     return 'at %1.2f seconds' % (time.time() - start)
 
-async def hz1():
-    print('1 Hz loop started work: {}'.format(tic()))
+async def display_hz1():
+    global message
+    print('Display 1 Hz loop started work: {}'.format(tic()))
+    time3 = time.time()
+    while True:
+        display.show()
+        display.text('Rx: ', 0, 0, 1)
+        display.text(message, 25, 0, 1)
+        await asyncio.sleep(0)
+        if time.time() > time3 + 1.0:
+            # timer ends after one second
+            print('Display 1 Hz loop ended work: {}'.format(tic()))
+            time3 = time.time()
+            display.fill(0)
+
+async def send_hz1():
+    global message
+    print('Tx 1 Hz loop started work: {}'.format(tic()))
     time2 = time.time()
     while True:
-        # do work here
-        await asyncio.sleep(0)
-        packet = None
-        # draw a box to clear the image
-        display.fill(0)
-        display.text('RasPi LoRa', 35, 0, 1)
-
         # check for packet rx
-        packet = rfm9x.receive()
-        if packet is None:
-            display.show()
-            display.text('- Waiting for PKT -', 15, 20, 1)
-        else:
-            # Display the packet text and rssi
-            display.fill(0)
-            prev_packet = packet
-            packet_text = str(prev_packet, "utf-8")
-            print("Rx: ", packet_text)
-            display.text('RX: ', 0, 0, 1)
-            display.text(packet_text, 25, 0, 1)
-            time.sleep(1)
-
-        if not btnA.value:
-            # Send Button A
-            display.fill(0)
-            button_a_data = bytes("Button A!\r\n","utf-8")
-            rfm9x.send(button_a_data)
-            display.text('Sent Button A!', 25, 15, 1)
-        elif not btnB.value:
-            # Send Button B
-            display.fill(0)
-            button_b_data = bytes("Button B!\r\n","utf-8")
-            rfm9x.send(button_b_data)
-            display.text('Sent Button B!', 25, 15, 1)
-        elif not btnC.value:
-            # Send Button C
-            display.fill(0)
-            button_c_data = bytes("Button C!\r\n","utf-8")
-            rfm9x.send(button_c_data)
-            display.text('Sent Button C!', 25, 15, 1)
-
-        display.show()
-        
-        if time.time() > time2 + 1:
+        rfm9x.send(message_bytes)
+        await asyncio.sleep(0)
+        if time.time() > time2 + 1.00:
             # timer ends after one second
-            print('1 Hz loop ended work: {}'.format(tic()))
+            print('Tx 1 Hz loop ended work: {}'.format(tic()))
             time2 = time.time()
-
 
 def main():
     ioloop = asyncio.get_event_loop()
-    tasks = [ioloop.create_task(hz1())]
+    tasks = [ioloop.create_task(display_hz1()), ioloop.create_task(send_hz1()) ]
     ioloop.run_until_complete(asyncio.wait(tasks))
     ioloop.close()
 
