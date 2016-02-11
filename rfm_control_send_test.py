@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-##############################################################
+#########################################
 # Sending data within a control loop using LoRa radios
 # Author: Mauricio
-##############################################################
+#########################################
 
 import time
 import asyncio
@@ -58,6 +58,7 @@ logging.warning("LoRa Distance Test Start - Sending.")
 
 # stats to log
 sent_packets = 0
+distance = 0
 
 # start global timer
 start = time.time()
@@ -68,15 +69,34 @@ message_bytes = bytes(message,"utf-8")
 def tic():
     return 'at %1.2f seconds' % (time.time() - start)
 
+async def distance_hz1():
+    global distance
+    print('Distance 1 Hz loop started work: {}'.format(tic()))
+    time4 = time.time()
+    while True:
+        # Update distance variable +100m
+        if not btnA.value:
+            distance += 100
+        # Update distance variable -100m
+        if not btnB.value:
+            if distance > 0:
+                distance -= 100
+            else:
+                distance = 0
+        await asyncio.sleep(1)
+        if time.time() > time4 + 1.0:
+            # timer ends after one second
+            print('Distance 1 Hz loop ended work: {}'.format(tic()))
+            time4 = time.time()
+
 async def display_hz1():
-    global message
-    global sent_packets
+    global message, sent_packets, distance
     print('Display 1 Hz loop started work: {}'.format(tic()))
     time3 = time.time()
     while True:
         display.show()
-        display.text('Rx: ', 0, 0, 1)
-        display.text(message, 25, 0, 1)
+        display.text('Tx: ', 0, 0, 1)
+        display.text(str(distance), 25, 0, 1)
         await asyncio.sleep(0)
         if time.time() > time3 + 1.0:
             # timer ends after one second
@@ -85,25 +105,23 @@ async def display_hz1():
             display.fill(0)
 
 async def send_hz1():
-    global message, sent_packets
+    global message, sent_packets, distance
     print('Tx 1 Hz loop started work: {}'.format(tic()))
     time2 = time.time()
     while True:
         # check for packet rx
-        rfm9x.send(message_bytes)
-        sent_packets += 1
-        logging.warning("Sent: %d", sent_packets)
-        
         await asyncio.sleep(0)
-        if time.time() > time2 + 1.00:
+        if time.time() > time2 + 1.0:
+            rfm9x.send(message_bytes)
+            sent_packets += 1
+            logging.warning("Sent: %d:%d", sent_packets,distance)
             # timer ends after one second
             print('Tx 1 Hz loop ended work: {}'.format(tic()))
             time2 = time.time()
-            break
 
 def main():
     ioloop = asyncio.get_event_loop()
-    tasks = [ioloop.create_task(display_hz1()), ioloop.create_task(send_hz1()) ]
+    tasks = [ ioloop.create_task(send_hz1()), ioloop.create_task(display_hz1()), ioloop.create_task(distance_hz1()) ]
     ioloop.run_until_complete(asyncio.wait(tasks))
     ioloop.close()
 
