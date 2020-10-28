@@ -1,2 +1,2 @@
 # rfm-control-loop
-Testing RFM functionality within a control loop
+Testing RFM functionality (Rx Tx) within a control loop
