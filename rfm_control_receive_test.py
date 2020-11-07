@@ -50,7 +50,7 @@ prev_packet = None
 
 start = time.time()
 
-message = "waiting.."
+message = ""
 
 def tic():
     return 'at %1.2f seconds' % (time.time() - start)
@@ -64,10 +64,11 @@ async def display_hz4():
         display.text('Rx: ', 0, 0, 1)
         display.text(message, 25, 0, 1)
         await asyncio.sleep(0)
-        if time.time() > time3 + 0.25:
+        if time.time() > time3 + 1:
             # timer ends after one second
             print('Display 4 Hz loop ended work: {}'.format(tic()))
             time3 = time.time()
+            display.fill(0)
 
 async def receive_hz4():
     global message
@@ -78,9 +79,11 @@ async def receive_hz4():
         packet = rfm9x.receive()
         if packet is not None:
             # Display the packet text and rssi
-            display.fill(0)
             prev_packet = packet
-            message = str(prev_packet, "utf-8")
+            message = str(packet, "utf-8")
+        else:
+            packet = None
+            message = "..."
 
         await asyncio.sleep(0)
         if time.time() > time2 + 0.25:
@@ -90,7 +93,7 @@ async def receive_hz4():
 
 def main():
     ioloop = asyncio.get_event_loop()
-    tasks = [ioloop.create_task(display_hz4()), ioloop.create_task(receive_hz4()) ]
+    tasks = [ioloop.create_task(receive_hz4()), ioloop.create_task(display_hz4()) ]
     ioloop.run_until_complete(asyncio.wait(tasks))
     ioloop.close()
 
