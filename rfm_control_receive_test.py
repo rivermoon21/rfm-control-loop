@@ -12,6 +12,8 @@ from digitalio import DigitalInOut, Direction, Pull
 import board
 import adafruit_ssd1306
 import adafruit_rfm9x
+import sys
+import logging
 
 # Button A
 btnA = DigitalInOut(board.D5)
@@ -48,6 +50,16 @@ rfm9x = adafruit_rfm9x.RFM9x(spi, CS, RESET, 915.0)
 rfm9x.tx_power = 23
 prev_packet = None
 
+# log file
+logfile = "rcv_app.log"
+logging.getLogger("asyncio")
+logging.basicConfig(format="%(asctime)s - %(message)s", filename=logfile, level=logging.WARNING)
+logging.info("LoRa Distance Test Start - Receiving.")
+
+# stats to log
+rcv_packets = 0
+
+# start global timer
 start = time.time()
 
 message = ""
@@ -71,14 +83,17 @@ async def display_hz4():
             display.fill(0)
 
 async def receive_hz4():
-    global message
+    global message, rcv_packets
     print('Receive 4 Hz loop started work: {}'.format(tic()))
     time2 = time.time()
     while True:
         # check for packet rx
         packet = rfm9x.receive()
+
+        # if packet is received
         if packet is not None:
-            # Display the packet text and rssi
+            rcv_packets += 1
+            logging.warning("Sent: %d", rcv_packets)
             prev_packet = packet
             message = str(packet, "utf-8")
         else:

@@ -12,6 +12,8 @@ from digitalio import DigitalInOut, Direction, Pull
 import board
 import adafruit_ssd1306
 import adafruit_rfm9x
+import sys
+import logging
 
 # Button A
 btnA = DigitalInOut(board.D5)
@@ -48,6 +50,16 @@ rfm9x = adafruit_rfm9x.RFM9x(spi, CS, RESET, 915.0)
 rfm9x.tx_power = 23
 prev_packet = None
 
+# log file
+logfile = "send_app.log"
+logging.basicConfig(format="%(asctime)s - %(message)s", filename=logfile, level=logging.WARNING)
+logging.getLogger("asyncio")
+logging.warning("LoRa Distance Test Start - Sending.")
+
+# stats to log
+sent_packets = 0
+
+# start global timer
 start = time.time()
 
 message = "Node 1: 12345\n"
@@ -58,6 +70,7 @@ def tic():
 
 async def display_hz1():
     global message
+    global sent_packets
     print('Display 1 Hz loop started work: {}'.format(tic()))
     time3 = time.time()
     while True:
@@ -72,17 +85,21 @@ async def display_hz1():
             display.fill(0)
 
 async def send_hz1():
-    global message
+    global message, sent_packets
     print('Tx 1 Hz loop started work: {}'.format(tic()))
     time2 = time.time()
     while True:
         # check for packet rx
         rfm9x.send(message_bytes)
+        sent_packets += 1
+        logging.warning("Sent: %d", sent_packets)
+        
         await asyncio.sleep(0)
         if time.time() > time2 + 1.00:
             # timer ends after one second
             print('Tx 1 Hz loop ended work: {}'.format(tic()))
             time2 = time.time()
+            break
 
 def main():
     ioloop = asyncio.get_event_loop()
