@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 ##############################################################
-# Sending data within a control loop using LoRa radios
+# Receiving data within a control loop using LoRa radios
 # Author: Mauricio
 ##############################################################
 
@@ -93,7 +93,7 @@ async def receive_hz4():
         # if packet is received
         if packet is not None:
             rcv_packets += 1
-            logging.warning("Sent: %d", rcv_packets)
+            logging.warning("Received: %d", rcv_packets)
             prev_packet = packet
             message = str(packet, "utf-8")
         else:
