@@ -57,7 +57,7 @@ logging.getLogger("asyncio")
 logging.warning("LoRa Distance Test Start - Sending.")
 
 # global counter for interval sending
-countdown = 20
+countdown = 30
 
 # stats to log
 sent_packets = 0
@@ -66,7 +66,7 @@ distance = 0
 # start global timer
 start = time.time()
 
-message = "Node 1: 12345\n"
+message = str(sent_packets) + str(distance)
 message_bytes = bytes(message,"utf-8")
 
 def tic():
@@ -98,13 +98,18 @@ async def display_hz1():
     global message, sent_packets, distance, countdown
     print('Display 1 Hz loop started work: {}'.format(tic()))
     time3 = time.time()
-    countdown = 20
+    countdown = 30
     while True:
-        countdown = 20 if countdown < 0 else countdown
+        countdown = 30 if countdown < 0 else countdown
         display.show()
         display.text('Tx Chosen: ', 0, 0, 1)
         display.text(str(distance), 0, 10, 1)
         display.text(str(countdown), 0, 20, 1)
+
+        if not btnC.value:
+            if countdown != 0:
+                countdown = 30
+
         await asyncio.sleep(0)
         if time.time() > time3 + 1.0:
             # timer ends after one second
@@ -119,8 +124,8 @@ async def send_hz1():
     time2 = time.time()
     while True:
         await asyncio.sleep(0)
-        if time.time() > time2 + 20.0:
-            countdown = 20
+        if time.time() > time2 + 30.0:
+            countdown = 30
             for _ in range(10):
                 rfm9x.send(message_bytes)
                 sent_packets += 1
