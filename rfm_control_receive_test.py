@@ -54,7 +54,7 @@ prev_packet = None
 logfile = "rcv_app.log"
 logging.getLogger("asyncio")
 logging.basicConfig(format="%(asctime)s - %(message)s", filename=logfile, level=logging.WARNING)
-logging.info("LoRa Distance Test Start - Receiving.")
+logging.warning("LoRa Distance Test Start - Receiving.")
 
 # stats to log
 rcv_packets = 0
@@ -93,9 +93,10 @@ async def receive_hz4():
         # if packet is received
         if packet is not None:
             rcv_packets += 1
-            logging.warning("Received: %d", rcv_packets)
             prev_packet = packet
             message = str(packet, "utf-8")
+            logging.warning("Received: %s", message)
+            print(message)
         else:
             packet = None
             message = "..."
