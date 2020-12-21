@@ -69,7 +69,7 @@ def tic():
 
 async def display_hz4():
     global message
-    print('Display 4 Hz loop started work: {}'.format(tic()))
+    #print('Display 4 Hz loop started work: {}'.format(tic()))
     time3 = time.time()
     while True:
         display.show()
@@ -78,13 +78,13 @@ async def display_hz4():
         await asyncio.sleep(0)
         if time.time() > time3 + 1:
             # timer ends after one second
-            print('Display 4 Hz loop ended work: {}'.format(tic()))
+            #print('Display 4 Hz loop ended work: {}'.format(tic()))
             time3 = time.time()
             display.fill(0)
 
 async def receive_hz4():
     global message, rcv_packets
-    print('Receive 4 Hz loop started work: {}'.format(tic()))
+    #print('Receive 4 Hz loop started work: {}'.format(tic()))
     time2 = time.time()
     while True:
         # check for packet rx
@@ -96,7 +96,7 @@ async def receive_hz4():
             prev_packet = packet
             message = str(packet, "utf-8")
             logging.warning("Received: %s", message)
-            print(message)
+            #print(message)
         else:
             packet = None
             message = "..."
@@ -104,7 +104,7 @@ async def receive_hz4():
         await asyncio.sleep(0)
         if time.time() > time2 + 0.25:
             # timer ends after one second
-            print('Rx 4 Hz loop ended work: {}'.format(tic()))
+            #print('Rx 4 Hz loop ended work: {}'.format(tic()))
             time2 = time.time()
 
 def main():
