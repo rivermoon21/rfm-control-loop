@@ -57,8 +57,8 @@ logging.getLogger("asyncio")
 logging.warning("LoRa Distance Test Start - Sending.")
 
 # global counter for interval sending
-countdown_start = 30
-countdown = 30
+countdown_start = 20
+countdown = 20
 
 # stats to log
 sent_packets = 0
@@ -78,13 +78,16 @@ async def distance_hz1():
     print('Distance 1 Hz loop started work: {}'.format(tic()))
     time4 = time.time()
     while True:
-        # Update distance variable +100m
-        if not btnA.value:
-            distance += 100
         # Update distance variable -100m
-        if not btnB.value:
+        if not btnA.value:
             if distance > 0:
                 distance -= 100
+            else:
+                distance = 0
+        # Update distance variable +100m
+        if not btnB.value:
+            if distance >= 0:
+                distance += 100
             else:
                 distance = 0
 
@@ -141,6 +144,7 @@ async def send_hz1():
             time2 = time.time()
 
 def main():
+    logging.warning("Main.")
     ioloop = asyncio.get_event_loop()
     tasks = [ ioloop.create_task(send_hz1()), ioloop.create_task(display_hz1()), ioloop.create_task(distance_hz1()) ]
     ioloop.run_until_complete(asyncio.wait(tasks))
