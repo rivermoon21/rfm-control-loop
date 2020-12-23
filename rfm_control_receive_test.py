@@ -89,12 +89,12 @@ async def receive_hz4():
     while True:
         # check for packet rx
         packet = rfm9x.receive()
+        prev_packet = packet
 
         # if packet is received
-        if packet is not None:
+        if prev_packet is not None:
             rcv_packets += 1
-            prev_packet = packet
-            message = str(packet, "utf-8")
+            message = str(prev_packet, "utf-8")
             logging.warning("Received: %s", message)
             #print(message)
         else:
@@ -108,6 +108,7 @@ async def receive_hz4():
             time2 = time.time()
 
 def main():
+    logging.warning("Main Loop Started.")
     ioloop = asyncio.get_event_loop()
     tasks = [ioloop.create_task(receive_hz4()), ioloop.create_task(display_hz4()) ]
     ioloop.run_until_complete(asyncio.wait(tasks))
